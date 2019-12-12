@@ -2687,6 +2687,18 @@ nta_tpn_by_url(su_home_t *home,
 
   tpn->tpn_ident = NULL;
 
+  /* EZ191212 - "416 Invalid URL" when we get a
+   * sips url with transport=tcp. As per  RFC-5630, this
+   * should be allowed. So. IF transport == tcp AND
+   * scheme = sips, override the protocol and set it to tls
+   */
+  if (su_casematch(url->url_scheme, "sips") &&
+       su_casematch(tpn->tpn_proto, "tcp"))
+  {
+    tpn->tpn_proto = "tls";
+    SU_DEBUG_7(("nta: overriding transport=tcp for \"sips\": setting protocol to tls"));
+  }
+
   if (tpn->tpn_proto)
     return 1;
 
