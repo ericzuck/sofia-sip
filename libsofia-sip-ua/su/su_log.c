@@ -134,7 +134,13 @@ void su_vllog(su_log_t *log, unsigned level, char const *fmt, va_list ap)
   }
 
   if (logger)
+  {
+    /* overload the stream. If the caller specified stream=-1,
+     * use it to carry the logging level. 
+     */
+    if((int*)stream == -1L) stream = (void*)(level+1); /* +1 so we can disambiguate NULL from level 0*/
     logger(stream, fmt, ap);
+  }
 }
 
 static char const not_initialized[1];
@@ -169,6 +175,7 @@ void su_log_init(su_log_t *log)
   else {
     log->log_level = log->log_default;
     log->log_init = 1;
+
     if (explicitly_initialized) {
       if (log != su_log_default)
 	su_llog(log, 0, "%s: logging at default level %u\n",
